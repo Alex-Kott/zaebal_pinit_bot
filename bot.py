@@ -14,6 +14,10 @@ def reply(message):
 	if message.from_user.id in pin_user:
 		bot.pin_chat_message(message.chat.id, message.message_id)
 
+@bot.message_handler(commands = ['ping'])
+def ping(message):
+	bot.send_message(message.chat.id, "I'm alive")
+
 if __name__ == '__main__':
 	bot.polling(none_stop=True)
 
