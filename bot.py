@@ -81,6 +81,7 @@ def reply_to_photo(m):
 	with Image(filename='./photo/{}'.format(photo_name)) as image:
 	    row, col = dhash.dhash_row_col(image)
 	photo_hash = dhash.format_hex(row, col)
+	os.remove('./photo/{}'.format(photo_name))
 	# print(photo_hash)
 	exist = 0
 	for row in Photo.select().where(Photo.chat_id == m.chat.id):
@@ -89,11 +90,13 @@ def reply_to_photo(m):
 		if photo_hash == row.photo_hash:
 			exist = 1
 			bot.send_message(row.chat_id, "Уже было", reply_to_message_id=row.message_id)
+			return True
+	Photo.create(chat_id = m.chat.id, message_id = m.message_id, photo_hash = photo_hash)
+	for row in Photo.select().where(Photo.chat_id == m.chat.id):
+		hd = distance.hamming(photo_hash, row.photo_hash)			
 		elif hd < 6:
 			bot.send_message(row.chat_id, "Похоже, что уже было", reply_to_message_id=row.message_id)
-	if exist == 0:
-		Photo.create(chat_id = m.chat.id, message_id = m.message_id, photo_hash = photo_hash)
-	os.remove('./photo/{}'.format(photo_name))
+		
 
 
 
