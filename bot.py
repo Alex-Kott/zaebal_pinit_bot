@@ -16,6 +16,9 @@ bot = telebot.TeleBot(cfg.token)
 db = SqliteDatabase('bot.db')
 
 uid = lambda m: m.from_user.id
+from_chat = lambda m: m.forward_from.id
+# from_user = lambda m: 
+# forward_message = lambda m: m.
 
 
 class BaseModel(Model):
@@ -32,6 +35,19 @@ class Message(BaseModel):
 	message_id = IntegerField(primary_key = True)
 	text 	   = TextField()
 	timestamp  = DateTimeField(default = datetime.datetime.now)
+
+
+class Repost(BaseModel):
+	chat_id			= IntegerField()
+	message_id 		= IntegerField()
+	from_chat		= IntegerField()
+	from_chat_type  = TextField()
+	user_id			= IntegerField()
+	timestamp 		= IntegerField()
+	forward_text	= TextField()
+
+	class Meta:
+		primary_key = CompositeKey("from_chat", "user_id", "timestamp", "forward_text")
 
 
 
@@ -57,6 +73,7 @@ def save_photo(message):
 def init(m):
 	Photo.create_table(fail_silently = True)
 	Message.create_table(fail_silently = True)
+	Repost.create_table(fail_silently = True)
 
 
 
@@ -68,9 +85,11 @@ def ping(message):
 
 @bot.message_handler(content_types = ['text'])
 def reply_to_text(m):
-	n = 1
+	n =1
 	# check_pin(m)
 	# print(m)
+	
+
 
 
 @bot.message_handler(content_types = ['photo'])
@@ -91,12 +110,12 @@ def reply_to_photo(m):
 			exist = 1
 			bot.send_message(row.chat_id, "Уже было", reply_to_message_id=row.message_id)
 			return True
-	Photo.create(chat_id = m.chat.id, message_id = m.message_id, photo_hash = photo_hash)
+	
 	for row in Photo.select().where(Photo.chat_id == m.chat.id):
 		hd = distance.hamming(photo_hash, row.photo_hash)			
-		elif hd < 6:
+		if hd < 6:
 			bot.send_message(row.chat_id, "Похоже, что уже было", reply_to_message_id=row.message_id)
-		
+	Photo.create(chat_id = m.chat.id, message_id = m.message_id, photo_hash = photo_hash)	
 
 
 
