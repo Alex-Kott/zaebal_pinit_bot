@@ -83,6 +83,11 @@ def ping(message):
 	bot.send_message(message.chat.id, "I'm alive")
 
 
+@bot.message_handler(content_types = ['new_chat_members'])
+def new_member(m):
+	bot.send_message(m.chat.id, "Пошёл нахуй", reply_to_message_id = m.message_id)
+
+
 @bot.message_handler(content_types = ['text'])
 def reply_to_text(m):
 	n =1
