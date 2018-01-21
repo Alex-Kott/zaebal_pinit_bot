@@ -8,6 +8,7 @@ from wand.image import Image
 import datetime
 import distance
 import os
+from pymorphy2 import MorphAnalyzer
 
 # https://habrahabr.ru/post/120562/
 
@@ -85,7 +86,18 @@ def ping(message):
 
 @bot.message_handler(content_types = ['new_chat_members'])
 def new_member(m):
-	bot.send_message(m.chat.id, "Пошёл нахуй", reply_to_message_id = m.message_id)
+	sex = 'male'
+	first_name = m.user.first_name
+	morph = MorphAnalyzer(first_name)
+	person = morph.parse(first_name)[0]
+	if person.tag.gender == 'femn':
+		sex = 'female'
+
+	if sex == 'male':
+		bot.send_message(m.chat.id, "Пошёл нахуй", reply_to_message_id = m.message_id)
+	else:
+		bot.send_message(m.chat.id, "Пошла нахуй", reply_to_message_id = m.message_id)
+
 
 
 @bot.message_handler(content_types = ['text'])
